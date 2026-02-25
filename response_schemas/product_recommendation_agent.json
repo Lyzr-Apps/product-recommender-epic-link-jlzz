@@ -1,0 +1,13 @@
+{
+  "agent_name": "Product Recommendation Agent",
+  "agent_id": "699eb282aeb240bf7f952ed3",
+  "agent_type": "json",
+  "accessor": "json",
+  "has_module_outputs": false,
+  "has_knowledge_base": true,
+  "rag_id": "699eb26fe9e49857cb7b8de0",
+  "response_schema": {
+    "response": "string - The agent's conversational response",
+    "products": "array - List of recommended products with name, description, price, match_reason"
+  }
+}

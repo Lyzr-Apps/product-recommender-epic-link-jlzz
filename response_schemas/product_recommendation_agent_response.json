@@ -1,0 +1,30 @@
+{
+  "agent_name": "Product Recommendation Agent",
+  "agent_id": "699eb282aeb240bf7f952ed3",
+  "description": "Conversational shopping assistant that understands customer preferences through dialogue, searches the product catalog knowledge base, and provides personalized product and service recommendations with details like name, description, price, and use case fit",
+  "agent_type": "json",
+  "accessor": "result",
+  "auto_generated": true,
+  "response_schema": {
+    "response": "string",
+    "products": [
+      {
+        "name": "string",
+        "description": "string",
+        "price": "string",
+        "match_reason": "string"
+      }
+    ]
+  },
+  "example_response": {
+    "response": "The agent's conversational response to the customer",
+    "products": [
+      {
+        "name": "Product name",
+        "description": "Brief product description",
+        "price": "Product price",
+        "match_reason": "Why this product matches the customer's needs"
+      }
+    ]
+  }
+}

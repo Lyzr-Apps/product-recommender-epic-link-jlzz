@@ -1,0 +1,11 @@
+{
+  "agents": {
+    "product_recommendation_agent": {
+      "agent_id": "699eb282aeb240bf7f952ed3",
+      "name": "Product Recommendation Agent",
+      "type": "single",
+      "has_knowledge_base": true,
+      "rag_id": "699eb26fe9e49857cb7b8de0"
+    }
+  }
+}
