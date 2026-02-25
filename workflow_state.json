@@ -5,7 +5,8 @@
       "name": "Product Recommendation Agent",
       "type": "single",
       "has_knowledge_base": true,
-      "rag_id": "699eb26fe9e49857cb7b8de0"
+      "rag_id": "699eb26fe9e49857cb7b8de0",
+      "tools": ["GOOGLESHEETS_BATCH_GET", "GOOGLESHEETS_BATCH_UPDATE", "GOOGLESHEETS_GET_SPREADSHEET_INFO", "GOOGLESHEETS_SHEET_FROM_JSON"]
     }
   }
 }

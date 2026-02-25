@@ -7,11 +7,16 @@ RAG ID: 699eb26fe9e49857cb7b8de0
 Model: gpt-4.1 (OpenAI)
 Temperature: 0.5 | Top_p: 0.95
 
+Integrations:
+- Knowledge Base (Product Catalog)
+- Google Sheets (GOOGLESHEETS_BATCH_GET, GOOGLESHEETS_BATCH_UPDATE, GOOGLESHEETS_GET_SPREADSHEET_INFO, GOOGLESHEETS_SHEET_FROM_JSON)
+
 Files Created/Updated:
 - workflow.json (Input -> Agent -> Output)
-- workflow_state.json (agent and RAG IDs)
+- workflow_state.json (agent IDs, RAG ID, tools)
 - response_schemas/product_recommendation_agent.json
 - app/globals.css (Heritage Dark theme)
-- app/page.tsx (Complete chat interface)
+- app/page.tsx (Chat interface with Google Sheets integration)
 
+Iteration: Added Google Sheets integration (2026-02-25)
 Completed: 2026-02-25

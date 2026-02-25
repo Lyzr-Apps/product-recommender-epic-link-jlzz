@@ -17,6 +17,8 @@ import { FiPackage, FiSearch, FiDatabase } from 'react-icons/fi'
 import { HiSparkles } from 'react-icons/hi2'
 import { AiOutlineDollar } from 'react-icons/ai'
 import { BiTargetLock } from 'react-icons/bi'
+import { SiGooglesheets } from 'react-icons/si'
+import { LuImport, LuFileSpreadsheet } from 'react-icons/lu'
 
 const AGENT_ID = '699eb282aeb240bf7f952ed3'
 const RAG_ID = '699eb26fe9e49857cb7b8de0'
@@ -40,7 +42,7 @@ const SAMPLE_MESSAGES: ChatMessage[] = [
   {
     id: 'sample-welcome',
     role: 'agent',
-    text: "Welcome! I'm your personal product assistant. I can help you find the perfect products based on your needs, preferences, and budget. Tell me what you're looking for, and I'll search our catalog for the best matches.",
+    text: "Welcome! I'm your personal product assistant. I can help you find the perfect products based on your needs, preferences, and budget. I can also read product data from your Google Sheets or export recommendations to a spreadsheet. Tell me what you're looking for!",
     products: [],
     timestamp: new Date().toISOString(),
   },
@@ -109,7 +111,7 @@ const SAMPLE_MESSAGES: ChatMessage[] = [
 const WELCOME_MESSAGE: ChatMessage = {
   id: 'welcome',
   role: 'agent',
-  text: "Welcome! I'm your personal product assistant. I can help you find the perfect products based on your needs, preferences, and budget. Tell me what you're looking for, and I'll search our catalog for the best matches.",
+  text: "Welcome! I'm your personal product assistant. I can help you find the perfect products based on your needs, preferences, and budget. I can also read product data from your Google Sheets or export recommendations to a spreadsheet. Tell me what you're looking for, and I'll search our catalog for the best matches.",
   products: [],
   timestamp: new Date().toISOString(),
 }
@@ -118,7 +120,7 @@ const EXAMPLE_PROMPTS = [
   'Find me a laptop for graphic design under $1500',
   'What are the best noise-cancelling headphones?',
   'I need a gift for a coffee lover',
-  'Recommend a beginner camera for photography',
+  'Read products from my Google Sheet',
 ]
 
 function parseAgentResponse(result: any): { response: string; products: Product[] } {
@@ -356,6 +358,9 @@ export default function Page() {
   const [sessionId, setSessionId] = useState('')
   const [sampleMode, setSampleMode] = useState(false)
   const [activeAgentId, setActiveAgentId] = useState<string | null>(null)
+  const [sheetId, setSheetId] = useState('')
+  const [sheetRange, setSheetRange] = useState('')
+  const [showSheetPanel, setShowSheetPanel] = useState(false)
 
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -453,6 +458,22 @@ export default function Page() {
     sendMessage(prompt)
   }, [sendMessage])
 
+  const handleSheetRead = useCallback(() => {
+    if (!sheetId.trim()) return
+    const range = sheetRange.trim() || 'Sheet1'
+    const msg = `Read product data from Google Sheet with spreadsheet ID: ${sheetId.trim()} and range: ${range}`
+    setShowSheetPanel(false)
+    sendMessage(msg)
+  }, [sheetId, sheetRange, sendMessage])
+
+  const handleSheetExport = useCallback(() => {
+    if (!sheetId.trim()) return
+    const range = sheetRange.trim() || 'Sheet1'
+    const msg = `Export the product recommendations from our conversation to Google Sheet with spreadsheet ID: ${sheetId.trim()} and range: ${range}`
+    setShowSheetPanel(false)
+    sendMessage(msg)
+  }, [sheetId, sheetRange, sendMessage])
+
   return (
     <ErrorBoundary>
       <div className="flex flex-col h-screen bg-background text-foreground">
@@ -524,6 +545,61 @@ export default function Page() {
                           <span className="text-muted-foreground">Knowledge Base</span>
                           <Badge variant="secondary" className="text-xs bg-accent/15 text-accent border-accent/25">Connected</Badge>
                         </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">Google Sheets</span>
+                          <Badge variant="secondary" className="text-xs bg-green-900/30 text-green-400 border-green-800/30">Enabled</Badge>
+                        </div>
+                      </div>
+                    </div>
+                    <Separator />
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <SiGooglesheets className="w-4 h-4 text-green-500" />
+                        <h3 className="text-sm font-semibold tracking-wide">Google Sheets Integration</h3>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+                        Connect a Google Sheet to import product data or export recommendations. Provide the spreadsheet ID and optional range.
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1.5 block tracking-wide">Spreadsheet ID</label>
+                          <Input
+                            value={sheetId}
+                            onChange={(e) => setSheetId(e.target.value)}
+                            placeholder="e.g. 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms"
+                            className="bg-secondary border-border text-foreground placeholder:text-muted-foreground/60 text-xs h-9"
+                          />
+                          <p className="text-[10px] text-muted-foreground/60 mt-1">Found in your Google Sheet URL after /d/</p>
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1.5 block tracking-wide">Range (optional)</label>
+                          <Input
+                            value={sheetRange}
+                            onChange={(e) => setSheetRange(e.target.value)}
+                            placeholder="e.g. Sheet1!A1:D50"
+                            className="bg-secondary border-border text-foreground placeholder:text-muted-foreground/60 text-xs h-9"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={handleSheetRead}
+                            disabled={!sheetId.trim() || isLoading}
+                            size="sm"
+                            className="flex-1 bg-green-900/40 hover:bg-green-900/60 text-green-300 border border-green-800/30 text-xs h-8"
+                          >
+                            <LuImport className="w-3.5 h-3.5 mr-1.5" />
+                            Import Products
+                          </Button>
+                          <Button
+                            onClick={handleSheetExport}
+                            disabled={!sheetId.trim() || isLoading}
+                            size="sm"
+                            className="flex-1 bg-accent/15 hover:bg-accent/25 text-accent border border-accent/20 text-xs h-8"
+                          >
+                            <LuFileSpreadsheet className="w-3.5 h-3.5 mr-1.5" />
+                            Export Recs
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -588,9 +664,71 @@ export default function Page() {
           )}
         </div>
 
+        {/* Google Sheets Quick Panel */}
+        {showSheetPanel && (
+          <div className="flex-shrink-0 border-t border-border bg-card px-4 py-3">
+            <div className="max-w-3xl mx-auto">
+              <div className="flex items-center gap-2 mb-3">
+                <SiGooglesheets className="w-4 h-4 text-green-500" />
+                <span className="text-xs font-semibold tracking-wide text-foreground">Quick Sheet Action</span>
+                <button onClick={() => setShowSheetPanel(false)} className="ml-auto text-muted-foreground hover:text-foreground">
+                  <IoChevronDown className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex items-end gap-2">
+                <div className="flex-1">
+                  <label className="text-[10px] text-muted-foreground mb-1 block tracking-wide">Spreadsheet ID</label>
+                  <Input
+                    value={sheetId}
+                    onChange={(e) => setSheetId(e.target.value)}
+                    placeholder="Paste spreadsheet ID here..."
+                    className="bg-secondary border-border text-foreground placeholder:text-muted-foreground/60 text-xs h-8"
+                  />
+                </div>
+                <div className="w-36">
+                  <label className="text-[10px] text-muted-foreground mb-1 block tracking-wide">Range</label>
+                  <Input
+                    value={sheetRange}
+                    onChange={(e) => setSheetRange(e.target.value)}
+                    placeholder="Sheet1!A1:D50"
+                    className="bg-secondary border-border text-foreground placeholder:text-muted-foreground/60 text-xs h-8"
+                  />
+                </div>
+                <Button
+                  onClick={handleSheetRead}
+                  disabled={!sheetId.trim() || isLoading}
+                  size="sm"
+                  className="bg-green-900/40 hover:bg-green-900/60 text-green-300 border border-green-800/30 text-xs h-8 px-3"
+                >
+                  <LuImport className="w-3.5 h-3.5 mr-1" />
+                  Import
+                </Button>
+                <Button
+                  onClick={handleSheetExport}
+                  disabled={!sheetId.trim() || isLoading}
+                  size="sm"
+                  className="bg-accent/15 hover:bg-accent/25 text-accent border border-accent/20 text-xs h-8 px-3"
+                >
+                  <LuFileSpreadsheet className="w-3.5 h-3.5 mr-1" />
+                  Export
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Input Bar */}
         <div className="flex-shrink-0 border-t border-border bg-card/80 backdrop-blur-sm px-4 py-3">
           <div className="max-w-3xl mx-auto flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSheetPanel(prev => !prev)}
+              className={cn("h-11 w-11 rounded-xl flex-shrink-0 transition-all duration-200", showSheetPanel ? "bg-green-900/30 text-green-400" : "text-muted-foreground hover:text-foreground")}
+              title="Google Sheets"
+            >
+              <SiGooglesheets className="w-4.5 h-4.5" />
+            </Button>
             <div className="flex-1 relative">
               <Input
                 ref={inputRef}
@@ -629,6 +767,11 @@ export default function Page() {
               <div className="flex items-center gap-1.5">
                 <FiDatabase className="w-3 h-3" />
                 <span className="tracking-wide">Knowledge Base</span>
+              </div>
+              <Separator orientation="vertical" className="h-3" />
+              <div className="flex items-center gap-1.5">
+                <SiGooglesheets className="w-3 h-3 text-green-500" />
+                <span className="tracking-wide">Google Sheets</span>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
